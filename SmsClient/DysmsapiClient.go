@@ -8,8 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
-	"log"
 	"math"
 	"math/rand"
 	"net/http"
