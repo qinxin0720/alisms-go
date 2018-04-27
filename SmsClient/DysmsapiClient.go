@@ -1,24 +1,24 @@
 package SmsClient
 
 import (
-	"errors"
-	"time"
-	"os"
-	"math"
-	"math/rand"
-	"strconv"
-	"fmt"
-	"crypto/md5"
-	"io"
-	"reflect"
-	"net/url"
 	"crypto/hmac"
+	"crypto/md5"
 	"crypto/sha1"
-	"net/http"
+	"encoding/base64"
+	"errors"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
-	"encoding/base64"
+	"math"
+	"math/rand"
+	"net/http"
+	"net/url"
+	"os"
+	"reflect"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type keepAliveAgent struct {
@@ -159,7 +159,6 @@ func request(action string, param Params, accessKeyId, secretAccessKey, endpoint
 	var resp *http.Response
 	resp, err = c.Do(req)
 	data, _ := ioutil.ReadAll(resp.Body)
-	log.Println(string(data))
 	return resp.StatusCode, err
 }
 
@@ -186,7 +185,7 @@ func makeNonce() string {
 	pid := os.Getpid()
 	val := math.Floor(float64(rand.Float64() * 1000000000000))
 	if val == last {
-		counter ++
+		counter++
 	} else {
 		counter = 0
 	}
