@@ -158,7 +158,7 @@ func request(action string, param Params, accessKeyId, secretAccessKey, endpoint
 	c := http.Client{}
 	var resp *http.Response
 	resp, err = c.Do(req)
-	data, _ := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
 	return resp.StatusCode, err
 }
 
