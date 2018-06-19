@@ -17,6 +17,7 @@ import (
     "strconv"
     "strings"
     "time"
+    "io/ioutil"
 )
 
 type keepAliveAgent struct {
@@ -40,14 +41,14 @@ const (
 )
 
 type dysmsapiClient struct {
-    accessKeyId,
+    accessKeyID,
     secretAccessKey,
     endpoint string
 }
 
-func newDysmsapiClient(accessKeyId, secretAccessKey, endpoint string) (*dysmsapiClient, error) {
+func newDysmsapiClient(accessKeyID, secretAccessKey, endpoint string) (*dysmsapiClient, error) {
     var ep string
-    if accessKeyId == "" {
+    if accessKeyID == "" {
         return nil, errors.New("accessKeyId is empty")
     }
     if secretAccessKey == "" {
@@ -62,27 +63,27 @@ func newDysmsapiClient(accessKeyId, secretAccessKey, endpoint string) (*dysmsapi
         ep = endpoint
     }
     return &dysmsapiClient{
-        accessKeyId:     accessKeyId,
+        accessKeyID:     accessKeyID,
         secretAccessKey: secretAccessKey,
         endpoint:        ep,
     }, nil
 }
 
-func (dsc *dysmsapiClient) SendSms(params Params, accessKeyId, secretAccessKey string) (int, error) {
+func (dsc *dysmsapiClient) SendSms(params Params, accessKeyID, secretAccessKey string) (int, string, error) {
     if params.PhoneNumbers == "" {
-        return http.StatusBadRequest, errors.New("parameter \"PhoneNumbers\" is required")
+        return http.StatusBadRequest, "parameter \"PhoneNumbers\" is required", errors.New("parameter \"PhoneNumbers\" is required")
     }
     if params.SignName == "" {
-        return http.StatusBadRequest, errors.New("parameter \"SignName\" is required")
+        return http.StatusBadRequest, "parameter \"SignName\" is required", errors.New("parameter \"SignName\" is required")
     }
     if params.TemplateCode == "" {
-        return http.StatusBadRequest, errors.New("parameter \"TemplateCode\" is required")
+        return http.StatusBadRequest, "parameter \"TemplateCode\" is required", errors.New("parameter \"TemplateCode\" is required")
     }
-    if accessKeyId == "" {
-        return http.StatusBadRequest, errors.New("parameter \"accessKeyId\" is required")
+    if accessKeyID == "" {
+        return http.StatusBadRequest, "parameter \"accessKeyId\" is required", errors.New("parameter \"accessKeyId\" is required")
     }
-    statusCode, err := request("SendSms", params, accessKeyId, secretAccessKey, dsc.endpoint)
-    return statusCode, err
+    statusCode, data, err := request("SendSms", params, accessKeyID, secretAccessKey, dsc.endpoint)
+    return statusCode, data, err
 }
 
 type mapList struct {
@@ -90,8 +91,8 @@ type mapList struct {
     normalized map[string]interface{}
 }
 
-func request(action string, param Params, accessKeyId, secretAccessKey, endpoint string) (int, error) {
-    defaults := buildParams(accessKeyId)
+func request(action string, param Params, accessKeyID, secretAccessKey, endpoint string) (int, string, error) {
+    defaults := buildParams(accessKeyID)
     ml := mapList{make([]string, 0, 24), make(map[string]interface{})}
     ml.l = append(ml.l, "AccessKeyId")
     ml.l = append(ml.l, "Action")
@@ -126,7 +127,7 @@ func request(action string, param Params, accessKeyId, secretAccessKey, endpoint
     params.SignatureNonce = defaults.SignatureNonce
     params.SignatureVersion = defaults.SignatureVersion
     params.Timestamp = defaults.Timestamp
-    params.AccessKeyId = defaults.AccessKeyId
+    params.AccessKeyId = defaults.AccessKeyID
     params.Version = defaults.Version
     params.PhoneNumbers = param.PhoneNumbers
     params.SignName = param.SignName
@@ -149,7 +150,7 @@ func request(action string, param Params, accessKeyId, secretAccessKey, endpoint
     urls := endpoint + "/?" + canonicalize(&ml)
     req, err := http.NewRequest("GET", urls, nil)
     if err != nil {
-        return http.StatusBadRequest, err
+        return http.StatusBadRequest, "Request error", err
     }
     q := req.URL.Query()
     req.URL.RawQuery = q.Encode()
@@ -157,7 +158,8 @@ func request(action string, param Params, accessKeyId, secretAccessKey, endpoint
     var resp *http.Response
     resp, err = c.Do(req)
     defer resp.Body.Close()
-    return resp.StatusCode, err
+    data, err := ioutil.ReadAll(resp.Body)
+    return resp.StatusCode, string(data), err
 }
 
 type buildParam struct {
@@ -166,13 +168,13 @@ type buildParam struct {
     SignatureNonce,
     SignatureVersion,
     Timestamp,
-    AccessKeyId,
+    AccessKeyID,
     Version string
 }
 
-func buildParams(accessKeyId string) *buildParam {
+func buildParams(accessKeyID string) *buildParam {
     return &buildParam{
-        "JSON", "HMAC-SHA1", makeNonce(), "1.0", timeStap(), accessKeyId, apiVersion,
+        "JSON", "HMAC-SHA1", makeNonce(), "1.0", timeStap(), accessKeyID, apiVersion,
     }
 }
 
