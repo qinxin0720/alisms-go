@@ -71,16 +71,16 @@ func newDysmsapiClient(accessKeyID, secretAccessKey, endpoint string) (*dysmsapi
 
 func (dsc *dysmsapiClient) SendSms(params Params, accessKeyID, secretAccessKey string) (int, string, error) {
     if params.PhoneNumbers == "" {
-        return http.StatusBadRequest, "parameter \"PhoneNumbers\" is required", errors.New("parameter \"PhoneNumbers\" is required")
+        return http.StatusBadRequest, `{"RequestId" : "", "Code" : "get_PhoneNumber_error", "Message" : "缺少参数，需要PhoneNumbers", "BizId" : ""}`, errors.New("parameter \"PhoneNumbers\" is required")
     }
     if params.SignName == "" {
-        return http.StatusBadRequest, "parameter \"SignName\" is required", errors.New("parameter \"SignName\" is required")
+        return http.StatusBadRequest, `{"RequestId" : "", "Code" : "get_signName_error", "Message" : "缺少参数，需要SignName", "BizId" : ""}`, errors.New("parameter \"SignName\" is required")
     }
     if params.TemplateCode == "" {
-        return http.StatusBadRequest, "parameter \"TemplateCode\" is required", errors.New("parameter \"TemplateCode\" is required")
+        return http.StatusBadRequest, `{"RequestId" : "", "Code" : "get_templateCode_error", "Message" : "缺少参数，需要TemplateCode", "BizId" : ""}`, errors.New("parameter \"TemplateCode\" is required")
     }
     if accessKeyID == "" {
-        return http.StatusBadRequest, "parameter \"accessKeyId\" is required", errors.New("parameter \"accessKeyId\" is required")
+        return http.StatusBadRequest, `{"RequestId" : "", "Code" : "get_accessKeyID_error", "Message" : "缺少参数，需要accessKeyID", "BizId" : ""}`, errors.New("parameter \"accessKeyId\" is required")
     }
     statusCode, data, err := request("SendSms", params, accessKeyID, secretAccessKey, dsc.endpoint)
     return statusCode, data, err
@@ -150,7 +150,7 @@ func request(action string, param Params, accessKeyID, secretAccessKey, endpoint
     urls := endpoint + "/?" + canonicalize(&ml)
     req, err := http.NewRequest("GET", urls, nil)
     if err != nil {
-        return http.StatusBadRequest, "Request error", err
+        return http.StatusBadRequest, `{"RequestId" : "", "Code" : "http_request_error", "Message" : "HTTP请求失败", "BizId" : ""}`, err
     }
     q := req.URL.Query()
     req.URL.RawQuery = q.Encode()
