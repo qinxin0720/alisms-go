@@ -183,6 +183,7 @@ func makeNonce() string {
     var last float64
     machine, _ := os.Hostname()
     pid := os.Getpid()
+    rand.Seed(time.Now().UnixNano())
     val := math.Floor(float64(rand.Float64() * 1000000000000))
     if val == last {
         counter++
