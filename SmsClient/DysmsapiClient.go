@@ -6,7 +6,6 @@ import (
     "crypto/sha1"
     "encoding/base64"
     "errors"
-    "fmt"
     "io"
     "math"
     "math/rand"
@@ -18,6 +17,7 @@ import (
     "strings"
     "time"
     "io/ioutil"
+    "encoding/hex"
 )
 
 type keepAliveAgent struct {
