@@ -194,7 +194,7 @@ func makeNonce() string {
     uid := machine + strconv.Itoa(pid) + strconv.FormatFloat(val, 'f', -1, 64) + strconv.Itoa(counter)
     m := md5.New()
     io.WriteString(m, uid)
-    return fmt.Sprintf("%x", m.Sum(nil))
+    return hex.EncodeToString(m.Sum(nil))
 }
 
 func timeStap() string {
